@@ -22,7 +22,6 @@ public class RegistrationForm {
     public User toUser(PasswordEncoder passwordEncoder) {
         return new User(
                 username, passwordEncoder.encode(password),
-                Collections.singletonList(new SimpleGrantedAuthority(Roles.ROLE_USER.toString())),
                 fullname, street, city, state, zip, phone);
     }
 

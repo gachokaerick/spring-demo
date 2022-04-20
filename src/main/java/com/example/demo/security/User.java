@@ -1,22 +1,33 @@
 package com.example.demo.security;
 
+import com.example.demo.security.enumeration.Roles;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.annotation.Id;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-import javax.annotation.processing.Generated;
+import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Objects;
 
 @Getter
 @Setter
-public class User extends org.springframework.security.core.userdetails.User {
+@Entity
+@NoArgsConstructor
+public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
+
+    private String username;
+
+    private String password;
     private String fullName;
     private String street;
     private String city;
@@ -24,23 +35,22 @@ public class User extends org.springframework.security.core.userdetails.User {
     private String zip;
     private String phoneNumber;
 
-    public User(String username, String password, Collection<? extends GrantedAuthority> authorities) {
-        super(username, password, authorities);
-    }
+    private boolean accountNotExpired = true;
 
-    public User(String username, String password, Collection<? extends GrantedAuthority> authorities,
+    private boolean accountNotLocked = false;
+
+    private boolean credentialsNotExpired = true;
+
+    public User(String username, String password,
                 String fullName, String street, String city, String state, String zip, String phoneNumber) {
-        super(username, password, authorities);
+        this.username = username;
+        this.password = password;
         this.fullName = fullName;
         this.street = street;
         this.city = city;
         this.state = state;
         this.zip = zip;
         this.phoneNumber = phoneNumber;
-    }
-
-    public User(String username, String password, boolean enabled, boolean accountNonExpired, boolean credentialsNonExpired, boolean accountNonLocked, Collection<? extends GrantedAuthority> authorities) {
-        super(username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
     }
 
     @Override
@@ -70,5 +80,28 @@ public class User extends org.springframework.security.core.userdetails.User {
         return Objects.hash(super.hashCode(), getId());
     }
 
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.singletonList(new SimpleGrantedAuthority(Roles.ROLE_USER.toString()));
+    }
 
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }
