@@ -1,0 +1,56 @@
+stages:
+  - test
+  - build
+  - deploy
+
+sonarqube:
+  stage: test
+  variables:
+    SONAR_TOKEN: $SONAR_TOKEN
+    SONAR_HOST_URL: $SONAR_HOST
+    GIT_DEPTH: 0
+  script:
+    - docker start cicd-sonarqube || docker run -d --name cicd-sonarqube -p 9000:9000 sonarqube:8.9.7-community
+    - mvn verify sonar:sonar -D sonar.qualitygate.wait=true
+  tags:
+    - test
+  except:
+    - main
+
+build-dev:
+  stage: build
+  script:
+    - mvn spring-boot:build-image
+  tags:
+    - test
+  only:
+    - dev
+
+build-master:
+  stage: build
+  script:
+    - mvn spring-boot:build-image
+  tags:
+    - master
+  only:
+    - main
+
+deploy-dev:
+  stage: deploy
+  script:
+    - docker stop cicd || true && docker rm cicd || true
+    - docker run -d --name cicd -p 8081:8080 demo:0.0.1-SNAPSHOT
+  tags:
+    - test
+  only:
+    - dev
+
+deploy-master:
+  stage: deploy
+  script:
+    - docker stop cicd || true && docker rm cicd || true
+    - docker run -d --name cicd -p 8081:8080 demo:0.0.1-SNAPSHOT
+  tags:
+    - master
+  only:
+    - main
