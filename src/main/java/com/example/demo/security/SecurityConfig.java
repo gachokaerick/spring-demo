@@ -30,17 +30,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .antMatchers("/api/values")
-                .hasRole("USER")
-                .antMatchers("/**").permitAll()
-                .and()
-                .csrf()
-                .ignoringAntMatchers("/h2-console/**")
+                .anyRequest()
+                .permitAll()
                 // Allow pages to be loaded in frames from the same origin; needed for H2-Console
                 .and()
                 .headers()
                 .frameOptions()
-                .sameOrigin();
+                .sameOrigin()
+                .and()
+                .csrf()
+                .disable();
     }
 
     @Bean
